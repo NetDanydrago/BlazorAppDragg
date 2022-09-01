@@ -1,0 +1,47 @@
+﻿<div class="dropzone" @ondrop="() => 
+    {
+        DraggingElement.IsMove = true;
+        ElementDropContainer.InvokeAsync(DraggingElement);
+    }" ondragover="event.preventDefault();">
+    @foreach (var Element in DraggingItems.OrderBy(x => x.Order))
+    {
+        <div @ondrop="() => HandleDrop(Element)">
+            <div class="box" @ondragleave="@(()=> {Element.IsDragOver = false;})"
+             @ondragenter="@(()=>{Element.IsDragOver = true;})"
+             style="@(Element.IsDragOver?"border-style: solid; border-color:blue;":"")"
+             @ondragstart="() => {  DraggingElement = Element; }"
+             draggable="true">
+                @Element.Value
+            </div>
+        </div>
+
+    }
+</div>
+
+@code {
+
+    [CascadingParameter]
+    public EventCallback<DraggingItem> ElementDropContainer { get; set; }
+    
+
+    [Parameter]
+    public List<DraggingItem> DraggingItems { get; set; }
+
+    private void HandleDrop(DraggingItem element)
+    {
+        if(!element.IsMove){
+            
+        var Index = DraggingItems.IndexOf(element);
+        var IndexDraggin = DraggingItems.IndexOf(DraggingElement);
+        var OriginalItem = new DraggingItem()
+        { 
+            Value = DraggingItems[Index].Value
+        }; 
+        DraggingItems[Index].Value = DraggingElement.Value;
+        DraggingItems[Index].IsDragOver = DraggingElement.IsDragOver;
+        DraggingItems[IndexDraggin].Value = OriginalItem.Value;
+        }
+    }
+
+    private DraggingItem DraggingElement;
+}

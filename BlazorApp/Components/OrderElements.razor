@@ -1,0 +1,68 @@
+﻿
+<div class="dropzone" ondragover="event.preventDefault();">
+Ordena los Elementos
+@foreach(var Element in DraggingItems.OrderBy(x => x.Order)){
+    <div @ondrop="() => HandleDrop(Element)">
+            <div class="box" @ondragleave="@(()=> {Element.IsDragOver = false;})"
+             @ondragenter="@(()=>{Element.IsDragOver = true;})"
+             style="@(Element.IsDragOver?"border-style: solid; border-color:blue;":"")"
+             @ondragstart="() => {  DraggingElement = Element; }"
+             draggable="true">
+            @Element.Value
+        </div>
+    </div> 
+
+}
+</div>
+<div class="m-2">
+    <button @onclick="OnOrderList" class="btn-success">Listo</button>
+</div>
+
+
+@code {
+
+
+    [Parameter]
+    public List<string> Content { get; set; }
+
+    [Parameter]
+    public EventCallback<List<string>> OrderList { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if(Content is not null)
+        {
+            DraggingItems = new();
+            for(var i = 0; i < Content.Count; i++){
+                DraggingItems.Add(new DraggingItem() 
+                {
+                  Order = i,
+                  Value = Content[i],
+                });
+            }
+        }
+    }
+
+    private List<DraggingItem> DraggingItems;
+
+    private void HandleDrop(DraggingItem element){
+
+        var Index = DraggingItems.IndexOf(element);
+        var IndexDraggin = DraggingItems.IndexOf(DraggingElement);
+        var OriginalItem = new DraggingItem()
+        { 
+            Value = DraggingItems[Index].Value
+        }; 
+        DraggingItems[Index].Value = DraggingElement.Value;
+        DraggingItems[Index].IsDragOver = DraggingElement.IsDragOver;
+        DraggingItems[IndexDraggin].Value = OriginalItem.Value;
+
+    }
+
+    private async void OnOrderList(){
+        List<string> OrderElementList = DraggingItems.ConvertAll(x => x.Value);
+        await OrderList.InvokeAsync(OrderElementList);
+    }
+
+    private DraggingItem DraggingElement;
+}

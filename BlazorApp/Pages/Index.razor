@@ -1,0 +1,36 @@
+﻿@page "/"
+<div style="display:flex">
+    <PageTitle>Index</PageTitle>
+
+    <OrderElements Content="Elements" OrderList="OnOrderElements" />
+
+    <div>
+        @if (OrderNewElements != null)
+        {
+            <div>Nueva Lista de Elementos Ordenados</div>
+            @foreach (var Element in OrderNewElements)
+            {
+                <div class="box">
+                    @Element
+                </div>
+            }
+        }
+    </div>
+</div>
+
+
+@code{
+    List<string> OrderNewElements;
+
+
+    private void OnOrderElements(List<string> Elements){
+        OrderNewElements = Elements;
+    }
+
+
+
+    List<string> Elements = new()
+    {
+        "Elemento 1","Elemento 2", "Elemento 3","Elemento 4","Elemento 5"
+    };
+}

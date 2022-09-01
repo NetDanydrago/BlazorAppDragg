@@ -1,0 +1,36 @@
+﻿<div class="border-container">
+    <CascadingValue Value="this">
+       <DraggElement DraggingItems="DraggingElements" ></DraggElement>
+    </CascadingValue>
+</div>
+
+@code {
+
+    [Parameter] 
+    public List<string> Elements { get; set; }
+
+    public List<DraggingItem> DraggingElements = new();
+
+    protected override void OnInitialized()
+    {
+        for (var i = 0; i < Elements.Count; i++)
+        {
+            DraggingElements.Add(new DraggingItem()
+                {
+                    Order = i,
+                    Value = Elements[i],
+                });
+        }
+    }
+
+    public EventCallback<DraggingItem> ElementDropContainer { get; set; }
+
+    void HandlerDropConatiner(DraggingItem item)
+    {
+
+    }
+
+
+
+
+}
