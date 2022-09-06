@@ -1,46 +1,107 @@
-﻿<div class="dropzone" @ondrop="() => 
-    {
-        DraggingElement.IsMove = true;
-        ElementDropContainer.InvokeAsync(DraggingElement);
-    }" ondragover="event.preventDefault();">
-    @foreach (var Element in DraggingItems.OrderBy(x => x.Order))
-    {
-        <div @ondrop="() => HandleDrop(Element)">
-            <div class="box" @ondragleave="@(()=> {Element.IsDragOver = false;})"
-             @ondragenter="@(()=>{Element.IsDragOver = true;})"
-             style="@(Element.IsDragOver?"border-style: solid; border-color:blue;":"")"
-             @ondragstart="() => {  DraggingElement = Element; }"
-             draggable="true">
-                @Element.Value
-            </div>
-        </div>
+﻿<div class="border-container">
 
-    }
+    <div class="dropzone" @ondrop="() => {HandlePosition(DraggingElement);}" ondragover=" event.preventDefault();">
+        @foreach (var Element in DraggingItems.OrderBy(x => x.Order))
+        {
+            @if (Element.Box == Box.One)
+            {
+                <div @ondrop="() => HandleDrop(Element)" @ondrop:stopPropagation=true>
+                    <div class="box" @ondragleave="@(()=> {Element.IsDragOver = false;})"
+                 @ondragenter="@(()=>{
+                 Element.IsDragOver = true;})"
+                 style="@(Element.IsDragOver?"border-style: solid; border-color:blue;":"")"
+                 @ondragstart="() => {
+                // BoardContainer.DraggingBoxElement = Element;
+                 DraggingElement = Element;}"
+                 draggable="true">
+                        @Element.Value
+                    </div>
+                </div>
+            }
+        }
+    </div>
+    <div class="dropzone" @ondrop="() => {HandlePosition(DraggingElement);}" ondragover="event.preventDefault();">
+        @foreach (var Element in DraggingItems.OrderBy(x => x.Order))
+        {
+            @if (Element.Box == Box.Two)
+            {
+                <div @ondrop="() => HandleDrop(Element)" @ondrop:stopPropagation=true>
+                    <div class="box" @ondragleave="@(()=> {Element.IsDragOver = false;})"
+                 @ondragenter="@(()=>{
+                 Element.IsDragOver = true;})"
+                 style="@(Element.IsDragOver?"border-style: solid; border-color:blue;":"")"
+                 @ondragstart="() => {
+                // BoardContainer.DraggingBoxElement = Element;
+                 DraggingElement = Element;}"
+                 draggable="true">
+                        @Element.Value
+                    </div>
+                </div>
+            }
+        }
+    </div>
 </div>
+<div class="m-2">
+    <button @onclick="OnOrderItems" class="btn-success">Listo</button>
+</div>
+
+
+
 
 @code {
 
-    [CascadingParameter]
-    public EventCallback<DraggingItem> ElementDropContainer { get; set; }
-    
+    [Parameter]
+    public List<string> Elements { get; set; }
 
     [Parameter]
-    public List<DraggingItem> DraggingItems { get; set; }
+    public EventCallback<List<string>> OrderItems { get; set; }
 
+    private void HandlePosition(DraggingItem element)
+    {
+        if(element.Box == Box.One){
+            element.Box = Box.Two;
+        }else{
+            element.Box = Box.One;
+        }
+    }
+
+    private List<DraggingItem> DraggingItems = new();
+
+    protected override void OnInitialized()
+    {
+        for (var i = 0; i < Elements.Count; i++)
+        {
+            DraggingItems.Add(new DraggingItem()
+                {
+                    Order = i,
+                    Value = Elements[i],
+                    Box = Box.One
+                });
+        }
+    }
+
+    private async void OnOrderItems()
+    {
+        List<string> OrderElementList = DraggingItems.Where(d => d.Box == Box.Two).ToList().ConvertAll(x => x.Value);
+        await OrderItems.InvokeAsync(OrderElementList);
+    }
+
+
+    //Change order in elements
     private void HandleDrop(DraggingItem element)
     {
-        if(!element.IsMove){
-            
-        var Index = DraggingItems.IndexOf(element);
-        var IndexDraggin = DraggingItems.IndexOf(DraggingElement);
-        var OriginalItem = new DraggingItem()
-        { 
-            Value = DraggingItems[Index].Value
-        }; 
-        DraggingItems[Index].Value = DraggingElement.Value;
-        DraggingItems[Index].IsDragOver = DraggingElement.IsDragOver;
-        DraggingItems[IndexDraggin].Value = OriginalItem.Value;
+        if(DraggingElement != null){
+            var Index = DraggingItems.IndexOf(element);
+            var IndexDraggin = DraggingItems.IndexOf(DraggingElement);
+            var OriginalItem = new DraggingItem()
+                {
+                    Value = DraggingItems[Index].Value
+                };
+            DraggingItems[Index].Value = DraggingElement.Value;
+            DraggingItems[Index].IsDragOver = DraggingElement.IsDragOver;
+            DraggingItems[IndexDraggin].Value = OriginalItem.Value;
         }
+        element.IsDragOver = false;
     }
 
     private DraggingItem DraggingElement;

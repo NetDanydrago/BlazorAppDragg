@@ -1,8 +1,7 @@
 ﻿
 <div class="dropzone" ondragover="event.preventDefault();">
-Ordena los Elementos
 @foreach(var Element in DraggingItems.OrderBy(x => x.Order)){
-    <div @ondrop="() => HandleDrop(Element)">
+        <div @ondrop="() => HandleDrop(Element)" @ondrop:stopPropagation=true>
             <div class="box" @ondragleave="@(()=> {Element.IsDragOver = false;})"
              @ondragenter="@(()=>{Element.IsDragOver = true;})"
              style="@(Element.IsDragOver?"border-style: solid; border-color:blue;":"")"
@@ -10,12 +9,17 @@ Ordena los Elementos
              draggable="true">
             @Element.Value
         </div>
+          @if(Element.Order != 0){
+              <button class="btn-primary" @onclick="() => HandleUp(Element)">Subir</button>
+          }
+          @if(Element.Order < DraggingItems.Count - 1){
+                <button class="btn-primary" @onclick="() => HandleDown(Element)">Bajar</button>
+          }
     </div> 
-
 }
 </div>
 <div class="m-2">
-    <button @onclick="OnOrderList" class="btn-success">Listo</button>
+    <button @onclick="OnOrderItems" class="btn-success">Listo</button>
 </div>
 
 
@@ -26,9 +30,9 @@ Ordena los Elementos
     public List<string> Content { get; set; }
 
     [Parameter]
-    public EventCallback<List<string>> OrderList { get; set; }
+    public EventCallback<List<string>> OrderItems { get; set; }
 
-    protected override void OnParametersSet()
+    protected override void OnInitialized()
     {
         if(Content is not null)
         {
@@ -59,9 +63,25 @@ Ordena los Elementos
 
     }
 
-    private async void OnOrderList(){
+    private void HandleUp(DraggingItem element){
+        if(element.Order > 0){
+            DraggingElement = element;
+            var ElementChange = DraggingItems[element.Order - 1];
+            HandleDrop(ElementChange);
+        }
+    }
+
+    private void HandleDown(DraggingItem element){
+        if(element.Order < DraggingItems.Count - 1){
+            DraggingElement = element;
+            var ElementChange = DraggingItems[element.Order + 1];
+            HandleDrop(ElementChange);
+        }
+    }
+
+    private async void OnOrderItems(){
         List<string> OrderElementList = DraggingItems.ConvertAll(x => x.Value);
-        await OrderList.InvokeAsync(OrderElementList);
+        await OrderItems.InvokeAsync(OrderElementList);
     }
 
     private DraggingItem DraggingElement;

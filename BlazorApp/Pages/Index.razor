@@ -2,7 +2,7 @@
 <div style="display:flex">
     <PageTitle>Index</PageTitle>
 
-    <OrderElements Content="Elements" OrderList="OnOrderElements" />
+    <OrderElements Content="Elements" OrderItems="OnOrderElements" />
 
     <div>
         @if (OrderNewElements != null)
@@ -20,14 +20,13 @@
 
 
 @code{
-    List<string> OrderNewElements;
 
+
+    List<string> OrderNewElements;
 
     private void OnOrderElements(List<string> Elements){
         OrderNewElements = Elements;
     }
-
-
 
     List<string> Elements = new()
     {
