@@ -11,7 +11,6 @@
                  Element.IsDragOver = true;})"
                  style="@(Element.IsDragOver?"border-style: solid; border-color:blue;":"")"
                  @ondragstart="() => {
-                // BoardContainer.DraggingBoxElement = Element;
                  DraggingElement = Element;}"
                  draggable="true">
                         @Element.Value
@@ -31,7 +30,6 @@
                  Element.IsDragOver = true;})"
                  style="@(Element.IsDragOver?"border-style: solid; border-color:blue;":"")"
                  @ondragstart="() => {
-                // BoardContainer.DraggingBoxElement = Element;
                  DraggingElement = Element;}"
                  draggable="true">
                         @Element.Value
